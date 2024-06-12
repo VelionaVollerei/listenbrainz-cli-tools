@@ -1,3 +1,4 @@
+pub mod stats;
 use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};

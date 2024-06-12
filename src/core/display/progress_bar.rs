@@ -5,6 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::utils::logger::Logger;
 
+#[derive(Debug, Clone)]
 pub struct ProgressBarCli {
     pg: ProgressBar,
 }

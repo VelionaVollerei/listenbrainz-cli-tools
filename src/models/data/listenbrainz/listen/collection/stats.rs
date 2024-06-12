@@ -1,6 +1,16 @@
 use std::ops::Deref;
+use std::sync::Arc;
 
+use async_stream::try_stream;
+use chrono::format::Item;
+use color_eyre::eyre::Error;
+use futures::stream;
+use futures::Stream;
+use futures::StreamExt;
+use futures::TryFutureExt;
+use futures::TryStreamExt;
 use itertools::Itertools;
+use musicbrainz_rs::entity::release_group;
 
 use crate::core::display::progress_bar::ProgressBarCli;
 use crate::core::entity_traits::mb_cached::MBCached;
@@ -9,6 +19,8 @@ use crate::core::entity_traits::relations::has_release_group::HasReleaseGroup;
 use crate::core::statistics::statistic_sorter::StatisticSorter;
 use crate::models::cli::common::GroupByTarget;
 use crate::models::data::listenbrainz::listen::collection::ListenCollection;
+use crate::models::data::listenbrainz::listen::Listen;
+use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
 use crate::models::data::musicbrainz::work::Work;
 
 impl ListenCollection {
@@ -27,7 +39,7 @@ impl ListenCollection {
         match target {
             GroupByTarget::Recording => {
                 mapped
-                    .get_recording_statistics(&counter, &progress_bar)
+                    .get_recording_statistics_stream(&counter, &progress_bar)
                     .await?;
             }
             GroupByTarget::Artist => {
@@ -51,6 +63,52 @@ impl ListenCollection {
         }
 
         Ok(counter)
+    }
+
+    async fn stats<L, K>(listens: L, stats_type: GroupByTarget) -> color_eyre::Result<()>
+    where
+        L: IntoIterator<Item = Arc<Listen>> {
+        let mut ids = try_stream! {
+            for listen in listens {
+                let data = listen.get_statistic_data(stats_type).await?;
+
+                for ele in data {
+                    yield (ele, listen.clone())
+                }
+            }
+        };
+
+        ids = ids.buffer_unordered(20)
+        .try_collect()
+        .await;
+
+        let recording_ids: color_eyre::Result<Vec<(String, Arc<Listen>)>> = tokio_stream::iter(listens)
+            .try(|listen| async move {(listen.get_statistic_data(stats_type), listen)})
+            
+
+        for (id, listen) in recording_ids? {
+            counter.insert(&id, listen);
+        }
+
+        Ok(())
+    }
+
+    async fn get_recording_statistics_stream(self, counter: &StatisticSorter, progress_bar: &ProgressBarCli) -> color_eyre::Result<()> {
+        let recording_ids: color_eyre::Result<Vec<(RecordingMBID, Arc<Listen>)>> = stream::iter(progress_bar.wrap_iter(self.into_iter()))
+        .map(|listen| {
+            async move {
+                let recording_id = listen.get_primary_recording_id().await.transpose().expect("The listen should be mapped");
+
+                recording_id.map(|id| (id, listen))
+            }
+        })
+        .buffer_unordered(20).try_collect().await;
+
+        for (id, listen) in recording_ids? {
+            counter.insert(&id, listen);
+        }
+
+        Ok(())
     }
 
     async fn get_recording_statistics(
@@ -140,9 +198,13 @@ impl ListenCollection {
                 .get_or_fetch_entities()
                 .await?;
 
+            let mut tasks = stream::iter(releases)
+                .map(|release| async move { release.get_or_fetch_release_group().await })
+                .buffer_unordered(5);
+
             let mut release_groups_ids = Vec::new();
-            for release in releases {
-                release_groups_ids.push(release.get_or_fetch_release_group().await?);
+            while let Some(release_group) = tasks.next().await {
+                release_groups_ids.push(release_group?);
             }
 
             release_groups_ids = release_groups_ids.into_iter().unique().collect_vec();
@@ -194,4 +256,21 @@ impl ListenCollection {
 
         Ok(())
     }
+}
+
+fn get_statistic_data_stream<L>(listens: L, stats_type: GroupByTarget) -> impl Stream<Item = color_eyre::Result<Vec<(String, Arc<Listen>)>>>
+where L: IntoIterator<Item = Arc<Listen>> {
+    use async_stream::stream;
+
+    try_stream! {
+        for listen in listens {
+            let data = listen.get_statistic_data(stats_type).await?;
+
+            yield stream! {
+                for ele in data {
+                    yield (ele, listen.clone());
+                }
+            }
+        }
+    }.flatten_unordered(None)
 }
