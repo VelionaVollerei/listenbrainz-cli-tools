@@ -2,6 +2,9 @@ pub mod is_cached_mbid;
 use crate::models::data::musicbrainz::external_musicbrainz_entity::ExternalMusicBrainzEntity;
 use crate::models::data::musicbrainz::mbid::MBID;
 use extend::ext;
+use futures::stream;
+use futures::Stream;
+use futures::StreamExt;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::{Debug, Display};
@@ -36,6 +39,12 @@ where
         }
 
         Ok(result)
+    }
+
+    fn get_or_fetch_entities_stream(&self) -> impl Stream<Item = color_eyre::Result<T>> {
+        stream::iter(self)
+            .map(|id| id.get_or_fetch_entity())
+            .buffered(1)
     }
 }
 

@@ -6,6 +6,7 @@ use crate::core::entity_traits::mbid::IsMbid;
 use crate::core::entity_traits::relations::has_artist_credits::HasArtistCredits;
 use crate::models::data::musicbrainz::artist_credit::collection::ArtistCredits;
 use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
+use crate::models::data::musicbrainz::release;
 use crate::models::data::musicbrainz::release::mbid::ReleaseMBID;
 use crate::models::data::musicbrainz::work::mbid::WorkMBID;
 
@@ -24,6 +25,10 @@ impl Recording {
             }
         })
     }
+
+    //pub async fn get_or_fetch_release_group_stream(&self) -> color_eyre::Result<Vec<ReleaseMBID>> {
+    //    let releases = self.get_or_fetch_releases_ids();
+    //}
 
     pub async fn get_or_fetch_work_ids(&self) -> color_eyre::Result<Vec<WorkMBID>> {
         Ok(match &self.relations {

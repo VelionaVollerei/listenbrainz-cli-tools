@@ -1,8 +1,12 @@
 use std::fmt::Display;
 use std::sync::{Arc, Mutex};
 
+use async_stream::try_stream;
 use color_eyre::owo_colors::OwoColorize;
 use derive_builder::Builder;
+use futures::Stream;
+use futures::StreamExt;
+use futures::TryStream;
 use listenbrainz::raw::response::{UserListensListen, UserListensResponse};
 use listenbrainz::raw::Client;
 use once_cell::sync::Lazy;
@@ -125,3 +129,4 @@ pub fn println_mus<T: Display>(string: T) {
     let logger = static_clone.lock().unwrap();
     logger.println_mus(string);
 }
+

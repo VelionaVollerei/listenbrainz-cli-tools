@@ -1645,6 +1645,7 @@ dependencies = [
 [[package]]
 name = "musicbrainz_rs_nova"
 version = "0.5.1"
+source = "git+https://github.com/RustyNova016/musicbrainz_rs.git?branch=feature/ratelimit#f512c1e91c432b99f3bce1e4d2f125fa48ba3967"
 dependencies = [
  "chrono",
  "lucene_query_builder",
