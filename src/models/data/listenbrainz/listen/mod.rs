@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use color_eyre::eyre::Context;
+use derive_getters::Getters;
+use derive_more::*;
 use serde::{Deserialize, Serialize};
 
-use crate::core::entity_traits::mb_cached::MBCached;
 use crate::models::data::listenbrainz::mapping_data::MappingData;
 use crate::models::data::musicbrainz::recording::Recording;
 
@@ -12,11 +13,15 @@ use super::messybrainz::MessyBrainzData;
 
 pub mod collection;
 pub mod convertion;
-pub mod getters;
+pub mod listen_mapping_state;
 pub mod mapped_listen;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Listen {
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+pub struct Listen<S = Unmapped>
+//TODO: Remove default
+where
+    S: MappingState,
+{
     /// The username of the user who listened to it
     pub user: String,
 
@@ -27,44 +32,28 @@ pub struct Listen {
     pub messybrainz_data: MessyBrainzData,
 
     /// Data of the mapping
-    pub mapping_data: Option<MappingData>,
+    pub mapping_data: S,
 }
 
-impl Listen {
-    pub fn is_mapped(&self) -> bool {
-        self.mapping_data.is_some()
-    }
+// Typestate
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+pub struct Unmapped {}
+pub type Mapped = MappingData;
 
-    pub fn get_mapping_data(&self) -> &Option<MappingData> {
-        &self.mapping_data
-    }
+trait MappingState {}
+impl MappingState for Unmapped {}
+impl MappingState for Mapped {}
 
+impl<S> Listen<S>
+where
+    S: MappingState,
+{
     pub fn get_listened_at(&self) -> &DateTime<Utc> {
         &self.listened_at
     }
 
-    /// If mapped, return the recording MBID
-    pub fn get_recording_mbid_as_string(&self) -> Option<&String> {
-        self.mapping_data
-            .as_ref()
-            .map(|mapping| &mapping.recording_mbid)
-    }
-
-    /// Return true if the listen is mapped to this recording MBID
-    pub fn is_mapped_to_recording(&self, mbid: &str) -> bool {
-        self.mapping_data
-            .as_ref()
-            .is_some_and(|mapping| mapping.recording_mbid == mbid)
-    }
-
-    /// Return the recording's data from Musicbrainz from its mapping
-    pub async fn get_recording_data(&self) -> color_eyre::Result<Option<Recording>> {
-        match &self.mapping_data {
-            Some(mapping) => Ok(Some(
-                Recording::get_cached_or_fetch(&mapping.recording_mbid().clone().into()).await?, //TODO: Use MBID
-            )),
-            None => Ok(None),
-        }
+    pub fn get_messybrain_data(&self) -> &MessyBrainzData {
+        &self.messybrainz_data
     }
 
     /// Send a mapping request to Listenbrainz
@@ -86,5 +75,48 @@ impl Listen {
             .context("Listenbrainz returned an error")?;
 
         Ok(())
+    }
+}
+
+impl Listen<Unmapped> {
+    pub fn new_unmapped(
+        username: String,
+        listened_at: DateTime<Utc>,
+        messybrainz_data: MessyBrainzData,
+    ) -> Self {
+        Self {
+            user: username,
+            listened_at,
+            messybrainz_data,
+            mapping_data: Unmapped {},
+        }
+    }
+
+    #[deprecated]
+    pub fn is_mapped(&self) -> bool {
+        false
+    }
+
+    #[deprecated]
+    pub fn get_mapping_data(&self) -> &Option<MappingData> {
+        &None
+    }
+
+    /// If mapped, return the recording MBID
+    #[deprecated]
+    pub fn get_recording_mbid_as_string(&self) -> Option<&String> {
+        None
+    }
+
+    /// Return true if the listen is mapped to this recording MBID
+    #[deprecated]
+    pub fn is_mapped_to_recording(&self, _mbid: &str) -> bool {
+        false
+    }
+
+    /// Return the recording's data from Musicbrainz from its mapping
+    #[deprecated]
+    pub async fn get_recording_data(&self) -> color_eyre::Result<Option<Recording>> {
+        Ok(None)
     }
 }

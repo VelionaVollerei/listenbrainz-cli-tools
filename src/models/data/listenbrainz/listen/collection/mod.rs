@@ -1,6 +1,8 @@
 mod converters;
 pub mod filters;
+pub mod listen_collection_spe;
 pub mod listen_rate;
+pub mod mapped;
 pub mod recording;
 use std::sync::Arc;
 
@@ -11,7 +13,9 @@ use serde::{Deserialize, Serialize};
 use crate::models::cli::common::SortListensBy;
 use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
 
+use super::listen_mapping_state::ListenMappingState;
 use super::Listen;
+use super::MappingState;
 
 pub mod stats;
 mod underrated;
@@ -23,7 +27,7 @@ use derive_more::*;
 pub struct ListenCollection {
     #[deref]
     #[deref_mut]
-    data: Vec<Arc<Listen>>,
+    data: Vec<ListenMappingState>,
 }
 
 impl ListenCollection {
