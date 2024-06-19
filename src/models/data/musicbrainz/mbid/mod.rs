@@ -1,6 +1,5 @@
-pub mod extensions;
-pub mod generic_mbid;
-pub mod mbid_any_state;
+pub mod streams;
+
 use derive_more::{Display, From, IsVariant, Unwrap};
 use serde::{Deserialize, Serialize};
 
@@ -13,8 +12,14 @@ use crate::models::data::musicbrainz::release::mbid::ReleaseMBID;
 use crate::models::data::musicbrainz::release_group::mbid::ReleaseGroupMBID;
 use crate::models::data::musicbrainz::work::mbid::WorkMBID;
 
+pub mod collections;
 pub mod converters;
+pub mod extensions;
+pub mod generic_mbid;
+pub mod mbid_any_state;
 pub mod mbid_kind;
+pub mod mbid_of_entity;
+pub mod mbid_or_entity;
 
 #[derive(Debug, Clone, PartialEq, Eq, From, Serialize, Deserialize, Display, IsVariant, Unwrap)]
 pub enum MBID {

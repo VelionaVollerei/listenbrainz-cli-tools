@@ -1,15 +1,23 @@
+use color_eyre::eyre::Error;
 use color_eyre::eyre::{eyre, Context, OptionExt};
+use futures::StreamExt;
+use futures::TryStream;
+use futures::TryStreamExt;
 use itertools::Itertools;
 
 use crate::core::entity_traits::mb_cached::MBCached;
 use crate::core::entity_traits::mbid::IsMbid;
+use crate::core::entity_traits::mbid::VecIExt;
 use crate::core::entity_traits::relations::has_artist_credits::HasArtistCredits;
 use crate::models::data::musicbrainz::artist_credit::collection::ArtistCredits;
+use crate::models::data::musicbrainz::mbid::collections::legacy_collection::LegacyCollectionT;
 use crate::models::data::musicbrainz::mbid::generic_mbid::MBIDSpe;
 use crate::models::data::musicbrainz::mbid::generic_mbid::PrimaryID;
 use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
 use crate::models::data::musicbrainz::release::mbid::ReleaseMBID;
+use crate::models::data::musicbrainz::release::Release;
 use crate::models::data::musicbrainz::work::mbid::WorkMBID;
+use crate::models::data::musicbrainz::mbid::streams::mbid_stream::MBIDStreamT;
 
 use super::Recording;
 
@@ -29,6 +37,16 @@ impl Recording {
                     .ok_or_eyre(eyre!(format!("Releases is [`None`] after fetching from the API. Something wrong happened, as it should return a empty vec. \n Is there an include missing somewhere in the API call? Or is the credit not saved? Faulty requested recording ID is: {}", &self.id)))?
             }
         })
+    }
+
+    pub async fn get_or_fetch_releases(
+        &self,
+    ) -> color_eyre::Result<impl TryStream<Ok = Release, Error = color_eyre::Report>> {
+        self.get_or_fetch_releases_ids()
+            .await?
+            .into_specialised_ids()
+            .into_entities()
+            .await
     }
 
     pub async fn get_or_fetch_work_ids(&self) -> color_eyre::Result<Vec<WorkMBID>> {

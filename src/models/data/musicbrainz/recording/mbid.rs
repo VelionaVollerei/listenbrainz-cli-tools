@@ -6,6 +6,7 @@ use crate::models::data::musicbrainz::mbid::generic_mbid::IdAliasState;
 use crate::models::data::musicbrainz::mbid::generic_mbid::MBIDSpe;
 use crate::models::data::musicbrainz::mbid::generic_mbid::NaiveID;
 use crate::models::data::musicbrainz::mbid::generic_mbid::PrimaryID;
+use crate::models::data::musicbrainz::mbid::mbid_of_entity::MBIDOfEntity;
 use crate::models::data::musicbrainz::mbid::MBID;
 use crate::models::data::musicbrainz::recording::external::RecordingExt;
 use crate::utils::println_mus;
@@ -55,19 +56,15 @@ impl RecordingMBID {
     }
 }
 
-impl<S> MBIDSpe<Recording, S>
+impl<S> MBIDSpe<Recording, S> where S: IdAliasState {}
+
+impl<S> MBIDOfEntity<Recording, RecordingMBID> for MBIDSpe<Recording, S> where S: IdAliasState {}
+
+impl<S> From<MBIDSpe<Recording, S>> for RecordingMBID
 where
     S: IdAliasState,
 {
-    pub fn into_legacy(self) -> RecordingMBID {
-        RecordingMBID(self.deref().to_string())
-    }
-
-    pub async fn into_primary(self) -> color_eyre::Result<MBIDSpe<Recording, PrimaryID>> {
-        let primary_alias = Recording::get_cache()
-            .get_or_fetch_primary_mbid_alias(&self.into_legacy())
-            .await?;
-
-        Ok(MBIDSpe::from(primary_alias.to_string()))
+    fn from(value: MBIDSpe<Recording, S>) -> Self {
+        RecordingMBID(value.deref().to_string())
     }
 }

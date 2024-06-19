@@ -2,6 +2,7 @@ use crate::models::data::listenbrainz::mapping_data::MappingData;
 use crate::models::data::musicbrainz::mbid::generic_mbid::MBIDSpe;
 use crate::models::data::musicbrainz::mbid::generic_mbid::PrimaryID;
 use crate::models::data::musicbrainz::recording::Recording;
+use crate::models::data::musicbrainz::release::Release;
 
 use super::listen_spe::ListenSpe;
 use super::listen_spe::MappedPrimary;
@@ -13,6 +14,10 @@ pub type MappedListen = ListenSpe<MappedPrimary>;
 impl MappedListen {
     pub fn get_recording_mbid(&self) -> &MBIDSpe<Recording, PrimaryID> {
         &self.mapping_data
+    }
+
+    pub async fn get_recording(&self) -> color_eyre::Result<Recording> {
+        self.mapping_data.get_or_fetch_entity().await
     }
 
     pub fn into_naive(self) -> NaiveMappedListen {
@@ -31,5 +36,10 @@ impl MappedListen {
 
     pub fn into_legacy(self) -> Listen {
         self.into_naive().into()
+    }
+
+    /// Return the releases of the mapped recording
+    pub async fn get_releases(&self) -> Vec<Release> {
+        self.get_recording().await?.get_or_fetch_releases_ids()
     }
 }
