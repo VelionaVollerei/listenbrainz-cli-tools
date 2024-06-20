@@ -7,6 +7,8 @@ use crate::models::data::musicbrainz::release::Release;
 use std::marker::PhantomData;
 use std::ops::Deref;
 
+use super::entity_with_mbid::EntityWithMBID;
+
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 pub struct MBIDSpe<T: EntityWithMBID, S: IdAliasState> {
     id: String,
@@ -14,10 +16,6 @@ pub struct MBIDSpe<T: EntityWithMBID, S: IdAliasState> {
     _entity_type: PhantomData<T>,
     _state: PhantomData<S>,
 }
-
-pub trait EntityWithMBID: Clone {}
-impl EntityWithMBID for Recording {}
-impl EntityWithMBID for Release {}
 
 // Id state
 #[derive(Debug, PartialEq, Eq, Clone)]

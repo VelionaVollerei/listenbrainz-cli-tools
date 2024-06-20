@@ -1,1 +1,1 @@
-
+pub static MAX_CONCURRENT_FETCH: i32 = 50;

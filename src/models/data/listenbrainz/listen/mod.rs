@@ -1,6 +1,7 @@
 pub mod listen_spe;
 pub mod listen_unmapped;
 pub mod listen_unspe;
+pub mod listen_with_data;
 pub mod mapped_naive;
 pub mod mapped_primary;
 pub mod stream;

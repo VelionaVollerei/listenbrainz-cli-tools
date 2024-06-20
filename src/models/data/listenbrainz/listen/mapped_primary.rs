@@ -1,8 +1,16 @@
+use futures::stream;
+use futures::StreamExt;
+use futures::TryStream;
+
+use crate::core::constants::MAX_CONCURRENT_FETCH;
+use crate::core::entity_traits::mbid::IsMbid;
 use crate::models::data::listenbrainz::mapping_data::MappingData;
 use crate::models::data::musicbrainz::mbid::generic_mbid::MBIDSpe;
 use crate::models::data::musicbrainz::mbid::generic_mbid::PrimaryID;
+use crate::models::data::musicbrainz::mbid::mbid_of_entity::MBIDOfEntity;
 use crate::models::data::musicbrainz::recording::Recording;
 use crate::models::data::musicbrainz::release::Release;
+use crate::utils::extensions::future_ext::CTryStreamExt;
 
 use super::listen_spe::ListenSpe;
 use super::listen_spe::MappedPrimary;
@@ -39,7 +47,16 @@ impl MappedListen {
     }
 
     /// Return the releases of the mapped recording
-    pub async fn get_releases(&self) -> Vec<Release> {
-        self.get_recording().await?.get_or_fetch_releases_ids()
+    pub async fn get_releases(&self) -> color_eyre::Result<Vec<Release>> {
+        let release_ids = self
+            .get_recording()
+            .await?
+            .get_or_fetch_releases_ids()
+            .await?;
+        stream::iter(release_ids)
+            .map(|id| async move { id.get_or_fetch_entity().await })
+            .buffer_unordered(MAX_CONCURRENT_FETCH as usize)
+            .try_collect_vec()
+            .await
     }
 }

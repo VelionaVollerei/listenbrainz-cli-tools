@@ -1,3 +1,4 @@
+pub mod entity_with_mbid;
 pub mod streams;
 
 use derive_more::{Display, From, IsVariant, Unwrap};

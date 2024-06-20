@@ -2,6 +2,7 @@ use super::Recording;
 use crate::core::entity_traits::mb_cached::MBCached;
 use crate::core::entity_traits::mbid::IsMbid;
 use crate::models::data::musicbrainz::external_musicbrainz_entity::ExternalMusicBrainzEntity;
+use crate::models::data::musicbrainz::mbid::entity_with_mbid::EntityWithMBID;
 use crate::models::data::musicbrainz::mbid::generic_mbid::IdAliasState;
 use crate::models::data::musicbrainz::mbid::generic_mbid::MBIDSpe;
 use crate::models::data::musicbrainz::mbid::generic_mbid::NaiveID;
@@ -66,5 +67,11 @@ where
 {
     fn from(value: MBIDSpe<Recording, S>) -> Self {
         RecordingMBID(value.deref().to_string())
+    }
+}
+
+impl EntityWithMBID for Recording {
+    fn get_mbid(&self) -> MBIDSpe<Self, PrimaryID> {
+        MBIDSpe::from(self.id.to_string())
     }
 }

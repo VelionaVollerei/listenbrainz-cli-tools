@@ -1,5 +1,6 @@
 use crate::models::data::listenbrainz::listen::listen_spe::ListenSpe;
 use crate::models::data::listenbrainz::listen::listen_spe::MappedPrimary;
+use crate::models::data::listenbrainz::listen::listen_with_data::collection::ListenWithDataCollection;
 use crate::models::data::musicbrainz::mbid::generic_mbid::MBIDSpe;
 use crate::models::data::musicbrainz::mbid::generic_mbid::PrimaryID;
 use crate::models::data::musicbrainz::recording::Recording;
@@ -34,9 +35,13 @@ pub impl MappedListenCollection {
         ListenCollection::from_iter(vec_of_legacy)
     }
 
-    fn keep_only_recording(self, id: &MBIDSpe<Recording, PrimaryID>) -> Self {
+    fn retain_listens_of_recording(self, id: &MBIDSpe<Recording, PrimaryID>) -> Self {
         self.into_iter()
             .filter(|listen| listen.get_recording_mbid() == id)
             .collect_vec()
+    }
+
+    fn into_listen_with_data(self) -> ListenWithDataCollection {
+        self.into_iter().map_into().collect_vec()
     }
 }

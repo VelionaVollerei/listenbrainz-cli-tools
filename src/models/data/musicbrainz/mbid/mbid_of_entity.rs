@@ -1,8 +1,8 @@
-use super::generic_mbid::EntityWithMBID;
 use super::generic_mbid::MBIDSpe;
 use super::generic_mbid::PrimaryID;
 use crate::core::entity_traits::mb_cached::MBCached;
 use crate::core::entity_traits::mbid::IsMbid;
+use crate::models::data::musicbrainz::mbid::entity_with_mbid::EntityWithMBID;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 

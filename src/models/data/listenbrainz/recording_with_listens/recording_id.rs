@@ -23,7 +23,7 @@ impl RecordingIDWithListens {
     ) -> Self {
         Self {
             recording_id: recording_id.clone(),
-            listens: listens.keep_only_recording(&recording_id),
+            listens: listens.retain_listens_of_recording(&recording_id),
         }
     }
 
