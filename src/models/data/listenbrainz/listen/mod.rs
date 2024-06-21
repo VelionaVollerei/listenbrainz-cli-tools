@@ -9,6 +9,7 @@ use crate::models::data::listenbrainz::mapping_data::MappingData;
 use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
 use crate::models::data::musicbrainz::recording::Recording;
 
+use super::messybrainz::msid::MSID;
 use super::messybrainz::MessyBrainzData;
 
 pub mod collection;
@@ -93,5 +94,9 @@ impl Listen {
             .context("Listenbrainz returned an error")?;
 
         Ok(())
+    }
+
+    pub fn get_msid(&self) -> MSID {
+        self.messybrainz_data.msid.clone().into()
     }
 }
