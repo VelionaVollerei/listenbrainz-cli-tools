@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 use config::ConfigCli;
 use lookup::LookupCommand;
 use mapping::MappingCommand;
+use listens::ListenCommand;
 
 use crate::models::cli::common::{GroupByTarget, SortSorterBy};
 use crate::models::cli::radio::RadioCommand;
@@ -15,6 +16,7 @@ pub mod config;
 pub mod lookup;
 pub mod mapping;
 pub mod radio;
+pub mod listens;
 
 /// Tools for Listenbrainz
 #[derive(Parser, Debug, Clone)]
@@ -55,6 +57,8 @@ pub enum Commands {
     /// Commands to deal with the app's configuration
     Config(ConfigCli),
 
+    Listen(ListenCommand),
+
     /// Get detailled information about an entity
     Lookup(LookupCommand),
 
@@ -91,6 +95,38 @@ pub enum Commands {
         #[arg(short, long, default_value_t = SortSorterBy::Count)]
         sort: SortSorterBy,
     },
+
+    /// Map unmapped recordings easily
+    Mapping {
+        /// Name of the user to fetch unlinked listen from
+        #[arg(short, long)]
+        username: String,
+
+        /// User token
+        #[arg(short, long)]
+        token: Option<String>,
+
+        /// Sort the listens by type
+        #[arg(short, long)]
+        sort: Option<SortListensBy>,
+    },
+
+    /// Generate playlists
+    Radio(RadioCommand),
+
+    Cache(CacheCommand),
+    Config(ConfigCli),
+    //Search {},
+
+    //Lookup {
+    //    /// Recording ID
+    //    #[arg(short, long)]
+    //    id: String,
+
+    //    /// Name of the user to fetch stats listen from
+    //    #[arg(short, long)]
+    //    username: String,
+    //},
 }
 
 impl Commands {
@@ -112,8 +148,10 @@ impl Commands {
 
             Self::Config(val) => val.command.run().await?,
 
-            Self::Lookup(val) => val.run().await?,
+            Self::Listen(val) => val.run().await?,
 
+            Self::Lookup(val) => val.run().await?,
+        
             Self::Mapping(val) => val.run().await?,
         }
         Ok(())
