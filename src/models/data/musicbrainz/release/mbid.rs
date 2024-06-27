@@ -53,7 +53,6 @@ impl IsMbid<Release> for ReleaseMBID {
     }
 }
 
-
 impl<S> IsMusicbrainzID<Release> for MBIDSpe<Release, S>
 where
     S: IdAliasState,

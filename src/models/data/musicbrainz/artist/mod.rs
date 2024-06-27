@@ -13,7 +13,7 @@ use crate::models::data::musicbrainz::work::mbid::WorkMBID;
 
 use super::entity::entity_kind::MusicbrainzEntityKind;
 use super::entity::is_musicbrainz_entity::IsMusicbrainzEntity;
-use super::entity::IsMusicbrainzEntity;
+
 use super::recording::mbid::RecordingMBID;
 use super::release::mbid::ReleaseMBID;
 use super::release_group::mbid::ReleaseGroupMBID;
@@ -95,4 +95,3 @@ impl IsMusicbrainzEntity for Artist {
         MBIDSpe::from(self.id.to_string())
     }
 }
-

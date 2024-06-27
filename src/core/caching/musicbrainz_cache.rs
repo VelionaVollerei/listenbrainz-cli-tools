@@ -174,7 +174,7 @@ where
     }
 
     /// **Get** from the loaded value, or **load** from the cache.
-    /// 
+    ///
     /// This version create its own read lock in case of a **get**, and create a write lock in case of **load**.
     pub async fn get_or_load(&self) -> color_eyre::Result<Option<Arc<V>>> {
         let get_result = self.get_or_lock().await;
@@ -186,9 +186,12 @@ where
     }
 
     /// **Get** from the loaded value, or **load** from the cache.
-    /// 
+    ///
     /// This version take an external write lock
-    pub async fn get_or_load_with_lock<'a>(&self, mut write_lock: &mut RwLockWriteGuard<'a, Option<Arc<V>>>) -> color_eyre::Result<Option<Arc<V>>> {
+    pub async fn get_or_load_with_lock<'a>(
+        &self,
+        mut write_lock: &mut RwLockWriteGuard<'a, Option<Arc<V>>>,
+    ) -> color_eyre::Result<Option<Arc<V>>> {
         if let Some(val) = write_lock.as_ref() {
             return Ok(Some(val.clone()));
         }
@@ -270,9 +273,9 @@ where
     }
 
     // --- Insert ---
-    
+
     /// Set a value in the value cache, its id in the alias cache and fill self
-    /// 
+    ///
     /// This automatically picks a write lock
     pub async fn set(&self, value: Arc<V>) -> Result<(), serde_cacache::Error> {
         let mbid = value.get_mbid();
@@ -285,9 +288,13 @@ where
     }
 
     /// Set a value in the value cache, its id in the alias cache and fill self
-    /// 
+    ///
     /// This version requiert a write lock
-    pub async fn set_with_lock<'a>(&self, value: Arc<V>, write_lock: &mut RwLockWriteGuard<'a, Option<Arc<V>>>) -> Result<(), serde_cacache::Error> {
+    pub async fn set_with_lock<'a>(
+        &self,
+        value: Arc<V>,
+        write_lock: &mut RwLockWriteGuard<'a, Option<Arc<V>>>,
+    ) -> Result<(), serde_cacache::Error> {
         let mbid = value.get_mbid();
 
         // TODO: Add try_join! for speedup.
@@ -298,7 +305,7 @@ where
     }
 
     // --- Update ---
-    
+
     pub async fn update(&self, value: Arc<V>) -> color_eyre::Result<()> {
         let older_version = self.get_or_load().await?;
 
@@ -310,7 +317,11 @@ where
         Ok(self.set(new_data).await?)
     }
 
-    async fn update_with_lock<'a>(&self, value: Arc<V>, mut write_lock: &mut RwLockWriteGuard<'a, Option<Arc<V>>>)-> color_eyre::Result<()> {
+    async fn update_with_lock<'a>(
+        &self,
+        value: Arc<V>,
+        mut write_lock: &mut RwLockWriteGuard<'a, Option<Arc<V>>>,
+    ) -> color_eyre::Result<()> {
         let older_version = self.get_or_load_with_lock(write_lock).await?;
 
         let new_data = match older_version {
@@ -319,9 +330,12 @@ where
         };
 
         Ok(self.set_with_lock(new_data, &mut write_lock).await?)
-    }   
+    }
 
-    pub async fn update_from_generic_entity(&self, value: AnyMusicBrainzEntity) -> color_eyre::Result<()> {
+    pub async fn update_from_generic_entity(
+        &self,
+        value: AnyMusicBrainzEntity,
+    ) -> color_eyre::Result<()> {
         let converted: Arc<V> = value.try_into()?;
         self.update(converted).await
     }

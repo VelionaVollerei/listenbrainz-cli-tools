@@ -49,7 +49,13 @@ where
 
 pub trait HasMBID<K>
 where
-    Self:Serialize + DeserializeOwned + Updatable + Sized + Debug + Clone + Into<AnyMusicBrainzEntity>,
+    Self: Serialize
+        + DeserializeOwned
+        + Updatable
+        + Sized
+        + Debug
+        + Clone
+        + Into<AnyMusicBrainzEntity>,
     Arc<Self>: Into<AnyMusicBrainzEntity> + TryFrom<AnyMusicBrainzEntity>,
     K: IsMbid<Self>,
 {

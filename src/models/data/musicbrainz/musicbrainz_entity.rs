@@ -121,14 +121,6 @@ impl From<Work> for AnyMusicBrainzEntity {
     }
 }
 
-impl<V> From<V> for AnyMusicBrainzEntity where V: HasMBID {
-    fn from(value: V) -> Self {
-        match value.get_kind() {
-            MusicbrainzEntityKind::Artist => Self::Artist(value)
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy)]
 pub enum MusicbrainzEntityKind {
     Artist,

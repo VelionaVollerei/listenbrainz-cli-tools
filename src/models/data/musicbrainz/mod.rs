@@ -9,14 +9,3 @@ pub mod relation;
 pub mod release;
 pub mod release_group;
 pub mod work;
-pub mod entity;
-
-pub trait HasId {
-    fn get_id(&self) -> &str;
-}
-
-impl<T: HasMbid> HasId for T {
-    fn get_id(&self) -> &str {
-        self.get_mbid()
-    }
-}

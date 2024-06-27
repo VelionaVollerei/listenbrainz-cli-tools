@@ -4,9 +4,7 @@ use crate::tools::lookup::lookup_command;
 use clap::Parser;
 use clap::ValueEnum;
 
-use crate::models::data::musicbrainz::mbid::mbid_kind::MBIDKind;
 use crate::models::data::musicbrainz::mbid::MBIDEnum;
-use crate::tools::lookup::lookup_command;
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]

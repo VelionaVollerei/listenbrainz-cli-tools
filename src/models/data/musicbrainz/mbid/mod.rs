@@ -17,8 +17,6 @@ use super::entity::IsMusicbrainzEntity;
 pub mod converters;
 pub mod extensions;
 pub mod generic_mbid;
-pub mod extensions;
-pub mod generic_mbid;
 pub mod is_musicbrainz_id;
 
 #[derive(
@@ -58,6 +56,6 @@ impl IsMbid<AnyMusicBrainzEntity> for MBIDEnum {
     }
 }
 
-pub struct MBID<K: IsMusicbrainzID<T>, T: IsMusicbrainzEntity> (K);
+pub struct MBID<K: IsMusicbrainzID<T>, T: IsMusicbrainzEntity>(K);
 
 pub trait IsMusicbrainzID<T> {}
