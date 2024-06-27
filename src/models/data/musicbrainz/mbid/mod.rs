@@ -17,7 +17,9 @@ use super::entity::IsMusicbrainzEntity;
 pub mod converters;
 pub mod extensions;
 pub mod generic_mbid;
-pub mod mbid_kind;
+pub mod extensions;
+pub mod generic_mbid;
+pub mod is_musicbrainz_id;
 
 #[derive(
     Debug, Clone, PartialEq, Eq, From, Serialize, Deserialize, Display, IsVariant, Unwrap, Hash,

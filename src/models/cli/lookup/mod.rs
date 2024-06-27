@@ -1,3 +1,6 @@
+use crate::models::data::musicbrainz::entity::entity_kind::MusicbrainzEntityKind;
+use crate::models::data::musicbrainz::mbid::MBID;
+use crate::tools::lookup::lookup_command;
 use clap::Parser;
 use clap::ValueEnum;
 
@@ -19,7 +22,9 @@ pub struct LookupCommand {
 impl LookupCommand {
     pub async fn run(&self) -> color_eyre::Result<()> {
         let id = match self.entity_type {
-            LookupTarget::Recording => MBIDEnum::from_string(&self.id, MBIDKind::Recording)?,
+            LookupTarget::Recording => {
+                MBIDEnum::from_string(&self.id, MusicbrainzEntityKind::Recording)?
+            }
         };
 
         lookup_command(&self.username, id).await?;

@@ -1,7 +1,7 @@
-use super::MBIDEnum;
+use crate::models::data::musicbrainz::mbid::MBIDEnum;
 
 #[derive(Debug, Clone, Copy)]
-pub enum MBIDKind {
+pub enum MusicbrainzEntityKind {
     Area,
     Artist,
     Event,
@@ -17,7 +17,7 @@ pub enum MBIDKind {
     Work,
 }
 
-impl MBIDKind {
+impl MusicbrainzEntityKind {
     pub fn to_mbid(&self, data: String) -> MBIDEnum {
         match self {
             Self::Artist => MBIDEnum::Artist(data.into()),
@@ -30,7 +30,7 @@ impl MBIDKind {
     }
 }
 
-impl From<MBIDEnum> for MBIDKind {
+impl From<MBIDEnum> for MusicbrainzEntityKind {
     fn from(value: MBIDEnum) -> Self {
         match value {
             MBIDEnum::Artist(_) => Self::Artist,

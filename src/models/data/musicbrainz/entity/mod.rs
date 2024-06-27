@@ -12,4 +12,5 @@ pub struct MusicBrainEntity<K: IsMusicbrainzID<T>, T: IsMusicbrainzEntity<K>> {
 
 pub trait IsMusicbrainzEntity<K> where Self: Serialize + DeserializeOwned + Clone, K: IsMusicbrainzID<Self> {
     fn get_mbid(&self) -> &K;
-}
+}pub mod entity_kind;
+pub mod is_musicbrainz_entity;
