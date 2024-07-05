@@ -7,7 +7,7 @@ use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
 pub struct MSID(String);
 
 impl MSID {
-    pub async fn submit_mapping(&self, mbid: RecordingMBID, token: &str) -> color_eyre::Result<()>{
+    pub async fn submit_mapping(&self, mbid: RecordingMBID, token: &str) -> color_eyre::Result<()> {
         let client = reqwest::Client::new();
 
         let mut body_json = HashMap::new();

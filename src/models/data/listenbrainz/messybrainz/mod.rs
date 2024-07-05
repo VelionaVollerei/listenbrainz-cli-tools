@@ -1,4 +1,3 @@
-pub mod msid;
 use std::collections::HashMap;
 
 use derive_getters::Getters;
@@ -7,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::extensions::listenbrainz_ext::UserListensTrackMetadataExt;
 
+pub mod msid;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
 pub struct MessyBrainzData {
     pub msid: String,
@@ -14,18 +15,26 @@ pub struct MessyBrainzData {
     pub artist_name: String,
     release_name: Option<String>,
     pub origin_url: Option<String>,
-    additional_info: HashMap<String, serde_json::Value>
+    additional_info: HashMap<String, serde_json::Value>,
 }
 
 impl MessyBrainzData {
     pub fn get_field(&self, name: &str) -> Option<String> {
-        if name == "msid" {return Some(self.msid.clone());}
-        if name == "track_name" {return Some(self.track_name.clone());}
-        if name == "artist_name" {return Some(self.artist_name.clone());}
-        if name == "release_name" {return self.release_name.as_ref().map(|val| val.to_string());}
-        
+        if name == "msid" {
+            return Some(self.msid.clone());
+        }
+        if name == "track_name" {
+            return Some(self.track_name.clone());
+        }
+        if name == "artist_name" {
+            return Some(self.artist_name.clone());
+        }
+        if name == "release_name" {
+            return self.release_name.as_ref().map(|val| val.to_string());
+        }
+
         self.additional_info.get(name).map(|val| val.to_string())
-    } 
+    }
 }
 
 impl From<UserListensListen> for MessyBrainzData {
@@ -39,8 +48,7 @@ impl From<UserListensListen> for MessyBrainzData {
                 .track_metadata
                 .get_additional_string_metadata("origin_url")
                 .cloned(),
-                additional_info: value.track_metadata.additional_info,
-
+            additional_info: value.track_metadata.additional_info,
         }
     }
 }
