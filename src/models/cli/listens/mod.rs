@@ -9,7 +9,6 @@ use crate::models::config::Config;
 #[command(version, about, long_about = None)]
 pub struct ListenCommand {
     /// Name of the user to fetch unlinked listen from
-    #[arg(short, long)]
     username: String,
 
     /// User token
@@ -26,7 +25,9 @@ impl ListenCommand {
     }
 
     pub async fn run(&self) -> color_eyre::Result<()> {
-        self.command.run(self.username.clone(), self.get_token()).await
+        self.command
+            .run(self.username.clone(), self.get_token())
+            .await
     }
 }
 
@@ -38,7 +39,7 @@ pub enum ListenSubCommands {
 impl ListenSubCommands {
     pub async fn run(&self, username: String, token: String) -> color_eyre::Result<()> {
         match self {
-            Self::Remap {  } => {
+            Self::Remap {} => {
                 Remapper::run(username, token).await;
             }
         }
