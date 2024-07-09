@@ -13,10 +13,10 @@ use crate::tools::stats::stats_command;
 pub mod cache;
 pub mod common;
 pub mod config;
+pub mod listens;
 pub mod lookup;
 pub mod mapping;
 pub mod radio;
-pub mod listens;
 
 /// Tools for Listenbrainz
 #[derive(Parser, Debug, Clone)]
