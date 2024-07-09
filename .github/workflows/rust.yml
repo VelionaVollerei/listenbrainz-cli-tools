@@ -87,17 +87,15 @@ jobs:
         run: cargo clippy -- -D warnings
 
   docs:
+    name: Documentation
     runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: -Dwarnings
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install minimal stable toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Run rustdoc
-        run: cargo doc --workspace --all-features --no-deps --document-private-items -D warnings
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/install@cargo-docs-rs
+      - run: cargo docs-rs
 
   fmt:
     runs-on: ubuntu-latest
