@@ -75,43 +75,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install minimal toolchain
-        uses: actions-rs/toolchain@v1
+      # Install minimal toolchain
+      - name: Install minimal stable toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-          profile: minimal
           components: clippy
 
       - uses: Swatinem/rust-cache@v2
 
       - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
 
   docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install minimal toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          profile: minimal
+      - name: Install minimal stable toolchain
+        uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
 
       - name: Run rustdoc
-        env:
-          RUSTDOCFLAGS: -D warnings
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --no-deps --document-private-items
+        run: cargo doc --workspace --all-features --no-deps --document-private-items -D warnings
 
   fmt:
     runs-on: ubuntu-latest
@@ -123,8 +109,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-
-      - uses: Swatinem/rust-cache@v2
 
       - name: Run rustfmt
         run: cargo fmt --all --check
