@@ -111,6 +111,8 @@ jobs:
       - name: Run rustfmt
         run: cargo fmt --all --check
 
+  # This is just a curtesy check to tell whether it should be breaking changes or not
+  # If CI fail because of this, just bump the version
   msrv:
     runs-on: ubuntu-latest
     steps:
