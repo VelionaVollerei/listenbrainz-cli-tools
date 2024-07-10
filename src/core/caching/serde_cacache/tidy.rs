@@ -58,15 +58,15 @@ where
             Ok(val) => {
                 //println_cli(format!("Cache hit for {key}"));
                 Ok(Some(val))
-            }
+            },
             Err(Error::EntryNotFound(_, _)) => {
                 //println_cli(format!("Cache miss for {key}"));
                 Ok(None)
-            }
+            },
             Err(val) => {
                 //println_cli(format!("Cache failure for {key}"));
                 Err(val)
-            }
+            },
         }
     }
 
@@ -78,7 +78,7 @@ where
             Ok(val) => {
                 let content: (String, V) = rmp_serde::from_slice(&val)?;
                 Ok(content.1)
-            }
+            },
 
             Err(cacache::Error::EntryNotFound(a, b)) => Err(Error::EntryNotFound(a, b)),
 
@@ -104,7 +104,7 @@ where
                     .expect("Couldn't get just inserted lock")
                     .deref()
                     .clone()
-            }
+            },
         }
     }
 
@@ -147,7 +147,7 @@ where
                     std::io::ErrorKind::NotFound => Ok(()), // This is fine. We wanted it deleted.
                     _ => Err(cacache::Error::IoError(err, stri)),
                 }
-            }
+            },
             Err(err) => Err(err),
         }
     }
@@ -172,7 +172,7 @@ where
                     // Wasn't a missing directory? Then that's bad
                     return Err(cacache::Error::IoError(val, comp));
                 }
-            }
+            },
 
             // ... But in other cases this is bad! Send it back up.
             Err(val) => return Err(val),
@@ -214,7 +214,7 @@ where
                 } else {
                     Err(err)
                 }
-            }
+            },
         }
     }
 }

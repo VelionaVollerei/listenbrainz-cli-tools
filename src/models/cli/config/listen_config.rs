@@ -39,7 +39,7 @@ impl ListenConfigSubcommands {
                     "Successfully set `RefreshUnmappedListens` to {}",
                     config_lock.listens.refresh_unmapped_listens
                 ));
-            }
+            },
         }
 
         Ok(())

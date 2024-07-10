@@ -43,13 +43,13 @@ impl CacheCommand {
         match &self.command {
             CacheSubcommands::LoadDump { username, path } => {
                 load_listen_dump(path, username).await?;
-            }
+            },
             CacheSubcommands::Clear { target } => {
                 let _ = try_join!(
                     MUSICBRAINZ_DATABASE.clear(target),
                     ENTITY_DATABASE.clear(*target)
                 )?;
-            }
+            },
         }
 
         Ok(())

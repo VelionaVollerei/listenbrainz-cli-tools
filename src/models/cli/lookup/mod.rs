@@ -22,7 +22,7 @@ impl LookupCommand {
         let id = match self.entity_type {
             LookupTarget::Recording => {
                 MBID::from_string(&self.id, MusicbrainzEntityKind::Recording)?
-            }
+            },
         };
 
         lookup_command(&self.username, id).await?;

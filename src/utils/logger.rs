@@ -21,12 +21,12 @@ impl Logger {
         match &self.print_override {
             Some(mpg) => {
                 mpg.add(pg);
-            }
+            },
             None => {
                 let mpg = MultiProgress::new();
                 mpg.add(pg);
                 self.print_override = Some(mpg);
-            }
+            },
         }
     }
 
@@ -36,8 +36,8 @@ impl Logger {
             Some(mpg) => {
                 mpg.remove(&pg);
                 mpg.clear().expect("TODO: panic message");
-            }
-            None => {}
+            },
+            None => {},
         }
 
         if self.bar_count == 0 {

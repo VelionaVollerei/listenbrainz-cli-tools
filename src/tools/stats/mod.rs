@@ -31,18 +31,18 @@ pub async fn stats_command(username: &str, target: GroupByTarget, sort_by: SortS
     match target {
         GroupByTarget::Recording => {
             recordings::stats_recording(stats, sort_by).await;
-        }
+        },
         GroupByTarget::Artist => {
             artists::stats_artist(stats, sort_by).await;
-        }
+        },
         GroupByTarget::Release => {
             releases::stats_releases(stats, sort_by).await;
-        }
+        },
         GroupByTarget::ReleaseGroup => {
             stats_release_groups(stats, sort_by).await;
-        }
+        },
         GroupByTarget::Work => {
             stats_works(stats, sort_by).await;
-        }
+        },
     }
 }

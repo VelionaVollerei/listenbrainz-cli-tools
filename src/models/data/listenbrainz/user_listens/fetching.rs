@@ -57,14 +57,14 @@ impl UserListens {
                 Ok(data) => {
                     data.insert_into_cache_as(user.to_lowercase()).await?;
                     return Ok(data);
-                }
+                },
                 Err(listenbrainz::Error::Http(_val)) => {
                     println_lis("Io error, retrying");
                     let count = *FETCH_COUNT.read().await;
 
                     // Retry with shorter count
                     *FETCH_COUNT.write().await = count.div_ceil(2);
-                }
+                },
                 Err(val) => return Err(Report::from(val)),
             }
         }

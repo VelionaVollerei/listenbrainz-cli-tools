@@ -1,3 +1,19 @@
+# Stable
+
+reorder_imports = true
+reorder_modules = true
+tab_spaces = 4
+use_try_shorthand = true
+use_field_init_shorthand = true
+match_block_trailing_comma = true
+
+
+# Nightly reformats. Uncomment and refactor with those if you have the Nightly toolchain. 
+
 #imports_layout = "Mixed"
 #imports_indent = "Block"
 #imports_granularity = "Module"
+#reorder_impl_items = true
+#overflow_delimited_expr = true
+#format_code_in_doc_comments = true
+#brace_style = "SameLineWhere"

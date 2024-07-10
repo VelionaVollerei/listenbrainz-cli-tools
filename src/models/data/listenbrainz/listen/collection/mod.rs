@@ -98,15 +98,15 @@ impl ListenCollection {
                         .unwrap_or_else(|| recording.get_messybrain_data().track_name.clone())
                 });
                 *self = Self { data: sorted }
-            }
+            },
 
             SortListensBy::OldestListen => {
                 let mut sorted = self.to_vec();
                 sorted.sort_by_key(|recording| recording.listened_at);
                 *self = Self { data: sorted }
-            }
+            },
 
-            SortListensBy::None => {}
+            SortListensBy::None => {},
         }
     }
 

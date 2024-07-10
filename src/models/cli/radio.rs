@@ -173,7 +173,7 @@ impl RadioSubcommands {
                     config,
                 )
                 .await;
-            }
+            },
 
             Self::Underrated { username, token } => {
                 underrated_mix(
@@ -182,7 +182,7 @@ impl RadioSubcommands {
                     config,
                 )
                 .await?;
-            }
+            },
 
             Self::Rate {
                 username,
@@ -213,7 +213,7 @@ impl RadioSubcommands {
                     config,
                 )
                 .await?;
-            }
+            },
 
             Self::Overdue {
                 username,
@@ -231,7 +231,7 @@ impl RadioSubcommands {
                     config,
                 )
                 .await?;
-            }
+            },
         }
 
         Ok(())

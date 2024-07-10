@@ -20,7 +20,7 @@ impl Artist {
                 self.recordings
                     .clone()
                     .expect("Couldn't retrive the recordings after insertion")
-            }
+            },
         };
 
         let mut recordings = Vec::new();

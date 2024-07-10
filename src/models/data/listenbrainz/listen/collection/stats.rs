@@ -29,25 +29,25 @@ impl ListenCollection {
                 mapped
                     .get_recording_statistics(&counter, &progress_bar)
                     .await?;
-            }
+            },
             GroupByTarget::Artist => {
                 mapped
                     .get_artist_statistics(&counter, &progress_bar)
                     .await?;
-            }
+            },
             GroupByTarget::Release => {
                 mapped
                     .get_release_statistics(&counter, &progress_bar)
                     .await?;
-            }
+            },
             GroupByTarget::ReleaseGroup => {
                 mapped
                     .get_release_group_statistics(&counter, &progress_bar)
                     .await?;
-            }
+            },
             GroupByTarget::Work => {
                 mapped.get_work_statistics(&counter, &progress_bar).await?;
-            }
+            },
         }
 
         Ok(counter)

@@ -35,7 +35,7 @@ pub trait ConfigFile: Serialize + DeserializeOwned + Default {
         match Self::get_config_reader() {
             Ok(Some(data)) => {
                 serde_json::from_reader(data).map_err(Error::ConfigLoadDeserializationError)
-            }
+            },
             Ok(None) => Ok(Self::default()),
             Err(err) => Err(Error::ConfigLoadError(err)),
         }

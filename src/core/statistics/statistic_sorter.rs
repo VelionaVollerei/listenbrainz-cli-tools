@@ -45,8 +45,8 @@ impl StatisticSorter {
             SortSorterBy::Count => {
                 out.sort_by_key(|item| item.1.len());
                 out.reverse();
-            }
-            SortSorterBy::Name | SortSorterBy::Oldest => {} // TODO
+            },
+            SortSorterBy::Name | SortSorterBy::Oldest => {}, // TODO
         }
 
         out

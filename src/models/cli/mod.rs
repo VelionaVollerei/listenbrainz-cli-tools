@@ -102,7 +102,7 @@ impl Commands {
                 sort,
             } => {
                 stats_command(&username.to_lowercase(), *target, *sort).await;
-            }
+            },
 
             Self::Compatibility { user_a, user_b } => compatibility_command(user_a, user_b).await?,
 

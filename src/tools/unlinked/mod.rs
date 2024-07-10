@@ -39,7 +39,7 @@ pub async fn unmapped_command(username: &str, sort: Option<SortSorterBy>) {
     match sort.unwrap_or_default() {
         SortSorterBy::Name => {
             messy_recordings.sort_by_key(|recording| recording.get_recording_name());
-        }
+        },
 
         SortSorterBy::Oldest => {
             messy_recordings.sort_by_key(|recording| {
@@ -47,11 +47,11 @@ pub async fn unmapped_command(username: &str, sort: Option<SortSorterBy>) {
                     .get_oldest_listen()
                     .map(|listen| listen.listened_at)
             });
-        }
+        },
 
         SortSorterBy::Count => {
             messy_recordings.sort_by_key(|recording| Reverse(recording.associated_listens.len()));
-        }
+        },
     }
 
     println!("Done! Here are {username}'s top unmapped listens:");

@@ -45,7 +45,7 @@ where
             val => {
                 val?;
                 Ok(None)
-            }
+            },
         }
     }
 

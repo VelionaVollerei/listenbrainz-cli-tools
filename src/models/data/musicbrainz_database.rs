@@ -79,23 +79,23 @@ impl MusicBrainzDatabase {
                 self.artists
                     .insert_alias(alias, &main.unwrap_artist())
                     .await?;
-            }
+            },
             MBID::Release(alias) => {
                 self.releases
                     .insert_alias(alias, &main.unwrap_release())
                     .await?;
-            }
+            },
             MBID::Work(alias) => self.works.insert_alias(alias, &main.unwrap_work()).await?,
             MBID::ReleaseGroup(alias) => {
                 self.release_groups
                     .insert_alias(alias, &main.unwrap_release_group())
                     .await?;
-            }
+            },
             MBID::Recording(alias) => {
                 self.recordings
                     .insert_alias(alias, &main.unwrap_recording())
                     .await?;
-            }
+            },
         }
 
         Ok(())
@@ -111,7 +111,7 @@ impl MusicBrainzDatabase {
                     self.release_groups.clear(),
                     self.works.clear()
                 )?;
-            }
+            },
         }
 
         Ok(())

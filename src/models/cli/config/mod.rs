@@ -59,7 +59,7 @@ impl ConfigCommands {
                 let mut conf = Config::load()?;
                 conf.set_token(username.clone(), token.clone());
                 conf.save()?;
-            }
+            },
 
             Self::Timeout {
                 recording,
@@ -70,7 +70,7 @@ impl ConfigCommands {
                         .unwrap_recording(),
                     Duration::from_human_string(duration)?,
                 )?;
-            }
+            },
 
             Self::BlacklistMapperMSID { msid, remove } => {
                 if !remove {
@@ -78,7 +78,7 @@ impl ConfigCommands {
                 } else {
                     Config::remove_blacklisted_msid(msid)?;
                 }
-            }
+            },
             Self::Listens(val) => val.run().await?,
         }
 

@@ -78,7 +78,7 @@ impl MappingSubcommands {
         match self {
             Self::ListUnmapped { username, sort } => {
                 unmapped_command(&username.to_lowercase(), *sort).await;
-            }
+            },
 
             Self::Mapper {
                 username,
@@ -91,7 +91,7 @@ impl MappingSubcommands {
                     *sort,
                 )
                 .await?;
-            }
+            },
         }
 
         Ok(())

@@ -70,13 +70,13 @@ where
             Ok(Some(val)) => {
                 //println_cli(format!("Cache hit for mbid {mbid}"));
                 Ok(Some(val))
-            }
+            },
 
             // Cache miss
             Ok(None) => {
                 //println_cli(format!("Cache miss for mbid {mbid}"));
                 Ok(None)
-            }
+            },
 
             // Something went wrong while deserializing the struct
             // Schema probably changed. Which means we need make the cache hit fail
@@ -87,7 +87,7 @@ where
                 println_cli(format!("Couldn't retrieve cache data for mbid {mbid}").yellow());
                 //println_cli(err);
                 Ok(None)
-            }
+            },
 
             Err(val) => Err(val),
         }
@@ -160,7 +160,7 @@ where
                 #[cfg(debug_assertions)]
                 println_cli_warn("Trying to fetch the primary alias of MBID resulted in `None`. Returning input instead");
                 Ok(mbid.clone())
-            }
+            },
             Err(val) => Err(val),
         }
     }
@@ -176,7 +176,7 @@ where
                     .get_or_option(mbid)
                     .await?
                     .expect("Couldn't retrieve the primary alias of MBID after fetching"))
-            }
+            },
             Err(val) => Err(val.into()),
         }
     }
@@ -196,7 +196,7 @@ where
                     .expect("Couldn't get just inserted lock")
                     .deref()
                     .clone()
-            }
+            },
         }
     }
 
