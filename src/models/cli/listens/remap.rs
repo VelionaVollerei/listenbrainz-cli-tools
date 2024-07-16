@@ -10,6 +10,9 @@ use crate::models::error::Error;
 use crate::utils::println_cli;
 use inquire::Select;
 use inquire::Text;
+use json_to_table::json_to_table;
+use tabled::settings::Style;
+use tabled::settings::Theme;
 use std::collections::HashMap;
 use strum::VariantArray;
 use strum_macros::VariantArray;
@@ -107,8 +110,11 @@ impl Remapper {
 
             remapped_msids.push(listen.get_messybrain_data().msid().clone());
 
+            let messybrain_json =
+                serde_json::to_value(listen.get_messybrain_data().clone()).unwrap();
+
             println!();
-            println!("{:#?}", listen.get_messybrain_data());
+            println!("{}", json_to_table(&messybrain_json).with(Style::modern()));
             println!();
 
             if !self.ask_remap_action(listen.as_ref()).await {
@@ -119,6 +125,7 @@ impl Remapper {
         if remapped_msids.is_empty() {
             println_cli("Couldn't find any listen matching the filter. Maybe try editing it?");
         } else {
+            println!();
             println_cli("All listens have been remapped sucessfully!");
         }
 
@@ -192,7 +199,7 @@ fn ask_for_field_name() -> String {
 }
 
 fn ask_for_field_value() -> String {
-    Text::new("What value does this field have?")
+    Text::new("What value does this field have? Text values must be in between \"quotes\"")
         .prompt()
         .unwrap()
 }
@@ -251,7 +258,7 @@ enum FilterActions {
     Add,
     #[strum(to_string = "🔄️ - Reset the filter")]
     Reset,
-    #[strum(to_string = "➡️ - Remap recordings")]
+    #[strum(to_string = "➡️ - Remap listens")]
     Remap,
     #[strum(to_string = "❌ - Exit")]
     Exit,

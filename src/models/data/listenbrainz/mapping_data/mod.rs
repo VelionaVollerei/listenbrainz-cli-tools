@@ -2,6 +2,7 @@ use derive_getters::Getters;
 use itertools::Itertools;
 use listenbrainz::raw::response::UserListensMBIDMapping;
 use serde::{Deserialize, Serialize};
+use tabled::Tabled;
 
 use crate::core::entity_traits::mb_cached::MBCached;
 use crate::core::entity_traits::relations::has_artist_credits::HasArtistCredits;

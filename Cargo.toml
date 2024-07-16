@@ -57,6 +57,8 @@ regex = "1.10.5"
 clap-markdown = "0.1.4"
 strum = "0.26.2"
 strum_macros = "0.26.3"
+tabled = "0.15.0"
+json_to_table = "0.7.0"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]

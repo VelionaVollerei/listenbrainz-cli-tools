@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use derive_getters::Getters;
 use listenbrainz::raw::response::UserListensListen;
 use serde::{Deserialize, Serialize};
+use tabled::Tabled;
 
 use crate::utils::extensions::listenbrainz_ext::UserListensTrackMetadataExt;
 

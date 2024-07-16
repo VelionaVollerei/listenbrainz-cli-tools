@@ -1,8 +1,11 @@
 use std::collections::HashMap;
+use std::fmt::Display;
 
 use chrono::{DateTime, Utc};
 use color_eyre::eyre::Context;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
+use tabled::Tabled;
 
 use crate::core::entity_traits::mb_cached::MBCached;
 use crate::models::data::listenbrainz::mapping_data::MappingData;
@@ -100,3 +103,4 @@ impl Listen {
         self.messybrainz_data.msid.clone().into()
     }
 }
+
