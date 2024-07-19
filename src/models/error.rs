@@ -30,9 +30,16 @@ pub enum Error {
     #[error("Error while getting the cache")]
     CacheError(#[from] serde_cacache::error::Error),
 
+    /// This error is made when trying to fetch an entity with a known redirection. The value contained is new MBID of the entity
+    #[error("Tried to fetch a redirected MBID. {0:?} should be fetched instead")]
+    MBIDRedirectError(String),
+
     // --- Fetching --- //
     #[error("Cannot find entity in Musicbrainz. It may have been deleted, or simply may not exist at all")]
     MBNotFound(String),
+
+    #[error("Error while fetching the entity {1} in musicbrainz")]
+    MBFetchingError(musicbrainz_rs::Error, String),
 
     // --- Type errors --- //
     #[error("Couldn't convert {0} into {1}")]

@@ -9,6 +9,7 @@ use crate::core::caching::serde_cacache::tidy::SerdeCacacheTidy;
 use crate::core::caching::CACHE_LOCATION;
 use crate::models::data::musicbrainz::entity::traits::MusicBrainzEntity;
 use crate::models::data::musicbrainz::mbid::state_id::state::NaiveMBID;
+use crate::models::data::musicbrainz::mbid::state_id::state::PrimaryMBID;
 use crate::models::error::Error;
 use crate::utils::println_cli_warn;
 
@@ -19,10 +20,10 @@ pub struct MusicbrainzCache<V>
 where
     V: MusicBrainzEntity,
 {
-    cache_entities: RwLock<HashMap<NaiveMBID<V>, Arc<CachedEntity<V>>>>,
+    cache_entities: RwLock<HashMap<NaiveMBID<V>, Arc<RwLock<CachedEntity<V>>>>>,
 
-    disk_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, V>>,
-    alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, NaiveMBID<V>>>,
+    disk_cache: Arc<SerdeCacacheTidy<PrimaryMBID<V>, V>>,
+    alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, PrimaryMBID<V>>>,
 }
 
 impl<V> MusicbrainzCache<V>
@@ -43,7 +44,7 @@ where
         }
     }
 
-    pub async fn get_entity(&self, id: &NaiveMBID<V>) -> Arc<CachedEntity<V>> {
+    pub async fn get_entity_entry(&self, id: &NaiveMBID<V>) -> Arc<RwLock<CachedEntity<V>>> {
         // Use a read to get the entity
         if let Some(entity) = self.cache_entities.read().await.get(id) {
             return entity.clone();
@@ -58,17 +59,29 @@ where
         }
 
         // No entity was found so we initialize it
-        let entity = Arc::new(CachedEntity::new(
+        let entity = Arc::new(RwLock::new(CachedEntity::new(
             id.clone(),
             self.disk_cache.clone(),
             self.alias_cache.clone(),
-        ));
+        )));
         map.insert(id.clone(), entity.clone());
         entity
     }
 
     pub async fn get_load_or_fetch(&self, mbid: &NaiveMBID<V>) -> color_eyre::Result<Arc<V>> {
-        self.get_entity(mbid).await.get_load_or_fetch().await
+        match self.get_entity_entry(mbid).await.read().await.get() {
+            Some(val) => Ok(val),
+            None => {
+                self.get_entity_entry(mbid)
+                    .await
+                    .write()
+                    .await
+                    .get_load_or_fetch()
+                    .await
+            }
+        }
+
+        self.get_entity_entry(mbid).await.get_load_or_fetch().await
     }
 
     pub async fn force_fetch_entity(&self, mbid: &NaiveMBID<V>) -> color_eyre::Result<Arc<V>> {
@@ -77,14 +90,14 @@ where
     }
 
     pub async fn set(&self, value: Arc<V>) -> Result<(), SerdeCacacheError> {
-        self.get_entity(&value.get_mbid().into_naive())
+        self.get_entity_entry(&value.get_mbid().into_naive())
             .await
             .set(value)
             .await
     }
 
     pub async fn update(&self, value: Arc<V>) -> color_eyre::Result<()> {
-        self.get_entity(&value.get_mbid().into_naive())
+        self.get_entity_entry(&value.get_mbid().into_naive())
             .await
             .update(value)
             .await

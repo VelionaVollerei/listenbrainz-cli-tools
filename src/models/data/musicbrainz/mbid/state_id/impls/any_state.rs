@@ -7,6 +7,7 @@ use crate::models::data::musicbrainz::mbid::state_id::state::PrimaryMBID;
 use crate::models::data::musicbrainz::mbid::state_id::MBIDState;
 use crate::models::data::musicbrainz::mbid::state_id::MBIDWithState;
 use crate::models::data::musicbrainz::mbid::state_id::MusicBrainzEntity;
+use crate::models::error::Error;
 
 impl<T, S> MBIDWithState<T, S>
 where
@@ -17,7 +18,7 @@ where
         T::get_cache()
     }
 
-    pub async fn fetch_entity(&self) -> color_eyre::Result<ExternalMusicBrainzEntity> {
+    pub async fn fetch_entity(&self) -> Result<ExternalMusicBrainzEntity, Error> {
         T::fetch(self).await
     }
 

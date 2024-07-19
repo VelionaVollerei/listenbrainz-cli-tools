@@ -12,8 +12,6 @@ use crate::models::data::musicbrainz::recording::Recording;
 
 use super::PrimaryListen;
 
-
-
 #[ext(name = TryCollectListensWithEntity)]
 pub impl<St, Ent, K, Err> St
 where
