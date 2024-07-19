@@ -20,10 +20,10 @@ pub struct MusicbrainzCache<V>
 where
     V: MusicBrainzEntity,
 {
-    cache_entities: RwLock<HashMap<NaiveMBID<V>, Arc<RwLock<CachedEntity<V>>>>>,
+    pub(super) cache_entities: RwLock<HashMap<NaiveMBID<V>, Arc<RwLock<CachedEntity<V>>>>>,
 
-    disk_cache: Arc<SerdeCacacheTidy<PrimaryMBID<V>, V>>,
-    alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, PrimaryMBID<V>>>,
+    pub(super) disk_cache: Arc<SerdeCacacheTidy<PrimaryMBID<V>, V>>,
+    pub(super) alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, NaiveMBID<V>>>,
 }
 
 impl<V> MusicbrainzCache<V>
@@ -68,35 +68,19 @@ where
         entity
     }
 
-    pub async fn get_load_or_fetch(&self, mbid: &NaiveMBID<V>) -> color_eyre::Result<Arc<V>> {
-        match self.get_entity_entry(mbid).await.read().await.get() {
-            Some(val) => Ok(val),
-            None => {
-                self.get_entity_entry(mbid)
-                    .await
-                    .write()
-                    .await
-                    .get_load_or_fetch()
-                    .await
-            }
-        }
-
-        self.get_entity_entry(mbid).await.get_load_or_fetch().await
-    }
-
     pub async fn force_fetch_entity(&self, mbid: &NaiveMBID<V>) -> color_eyre::Result<Arc<V>> {
         self.remove(mbid).await?;
-        self.get_load_or_fetch(mbid).await
+        Ok(self.get_load_or_fetch(mbid).await?)
     }
 
-    pub async fn set(&self, value: Arc<V>) -> Result<(), SerdeCacacheError> {
-        self.get_entity_entry(&value.get_mbid().into_naive())
-            .await
-            .set(value)
-            .await
-    }
+    // pub async fn set(&self, value: Arc<V>) -> Result<(), SerdeCacacheError> {
+    //     self.get_entity_entry(&value.get_mbid().into_naive())
+    //         .await
+    //         .set(value)
+    //         .await
+    // }
 
-    pub async fn update(&self, value: Arc<V>) -> color_eyre::Result<()> {
+    pub async fn update(&self, value: Arc<V>) -> Result<(), Error> {
         self.get_entity_entry(&value.get_mbid().into_naive())
             .await
             .update(value)
@@ -112,14 +96,7 @@ where
         Ok(())
     }
 
-    pub async fn insert_alias(
-        &self,
-        alias: &NaiveMBID<V>,
-        main: &NaiveMBID<V>,
-    ) -> Result<(), Error> {
-        self.alias_cache.set(alias, main).await?;
-        Ok(())
-    }
+
 
     pub async fn remove(&self, id: &NaiveMBID<V>) -> color_eyre::Result<()> {
         self.cache_entities.write().await.remove(id);
@@ -128,35 +105,18 @@ where
         Ok(())
     }
 
-    pub async fn get_primary_mbid_alias(
-        &self,
-        mbid: &NaiveMBID<V>,
-    ) -> Result<NaiveMBID<V>, SerdeCacacheError> {
-        match self.alias_cache.get_or_option(mbid).await {
-            Ok(Some(val)) => Ok(val),
-
-            Ok(None) | Err(SerdeCacacheError::CacheDeserializationError(_)) => {
-                #[cfg(debug_assertions)]
-                println_cli_warn("Trying to fetch the primary alias of MBID resulted in `None`. Returning input instead");
-                Ok(mbid.clone())
-            }
-
-            Err(val) => Err(val),
-        }
-    }
-
-    pub async fn get_or_fetch_primary_mbid_alias(
-        &self,
-        mbid: &NaiveMBID<V>,
-    ) -> color_eyre::Result<NaiveMBID<V>> {
-        match self.alias_cache.get_or_option(mbid).await {
-            Ok(Some(val)) => Ok(val),
-            Ok(None) | Err(SerdeCacacheError::CacheDeserializationError(_)) => {
-                Ok(self.force_fetch_entity(mbid).await?.get_mbid().into_naive())
-            }
-            Err(val) => Err(val.into()),
-        }
-    }
+    // pub async fn get_or_fetch_primary_mbid_alias(
+    //     &self,
+    //     mbid: &NaiveMBID<V>,
+    // ) -> color_eyre::Result<NaiveMBID<V>> {
+    //     match self.alias_cache.get_or_option(mbid).await {
+    //         Ok(Some(val)) => Ok(val),
+    //         Ok(None) | Err(SerdeCacacheError::CacheDeserializationError(_)) => {
+    //             Ok(self.force_fetch_entity(mbid).await?.get_mbid().into_naive())
+    //         }
+    //         Err(val) => Err(val.into()),
+    //     }
+    // }
 
     pub async fn clear(&self) -> cacache::Result<()> {
         let _ = try_join!(self.alias_cache.clear(), self.disk_cache.clear())?;

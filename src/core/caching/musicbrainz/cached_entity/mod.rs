@@ -8,21 +8,21 @@ use crate::models::data::musicbrainz::mbid::state_id::state::PrimaryMBID;
 use crate::models::data::musicbrainz::relation::external::RelationContentExt;
 use crate::models::error::Error;
 
+use derive_getters::Getters;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio::sync::RwLockWriteGuard;
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
 pub struct CachedEntity<V>
 where
     V: MusicBrainzEntity,
 {
     naive_id: NaiveMBID<V>,
-    primary_id: Option<PrimaryMBID<V>>,
     loaded: Option<Arc<V>>,
 
     disk_cache: Arc<SerdeCacacheTidy<PrimaryMBID<V>, V>>,
-    alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, PrimaryMBID<V>>>,
+    alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, NaiveMBID<V>>>,
 }
 
 impl<V> CachedEntity<V>
@@ -32,17 +32,17 @@ where
     pub fn new(
         id: NaiveMBID<V>,
         disk_cache: Arc<SerdeCacacheTidy<PrimaryMBID<V>, V>>,
-        alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, PrimaryMBID<V>>>,
+        alias_cache: Arc<SerdeCacacheTidy<NaiveMBID<V>, NaiveMBID<V>>>,
     ) -> Self {
         Self {
             alias_cache,
             disk_cache,
             naive_id: id,
-            primary_id: None,
             loaded: None,
         }
     }
 
+    /// Get the contained value. If there is a different primary id to this one, try getting the other's
     pub fn get(&self) -> Option<Arc<V>> {
         self.loaded.clone()
     }
@@ -50,28 +50,29 @@ where
     /// **Get** from the loaded value, or **load** from the cache.
     ///
     /// This version create its own read lock in case of a **get**, and create a write lock in case of **load**.
-    pub async fn get_or_load(&mut self) -> color_eyre::Result<Option<Arc<V>>> {
+    pub async fn get_or_load(&mut self) -> Result<Option<Arc<V>>, Error> {
         match &self.loaded {
             Some(val) => Ok(Some(val.clone())),
-            None => self.inner_load().await,
+            None => self.load().await,
         }
     }
 
     /// **Get** from the loaded value, or **load** from the cache, or **fetch** from the MB database
-    pub async fn get_load_or_fetch(&mut self) -> color_eyre::Result<Arc<V>> {
+    pub async fn get_load_or_fetch(&mut self) -> Result<Arc<V>, Error> {
         match &self.loaded {
             Some(val) => Ok(val.clone()),
             None => {
-                if let Some(val) = self.inner_load().await? {
+                if let Some(val) = self.load().await? {
                     return Ok(val.clone());
                 }
 
-                self.inner_fetch().await
+                self.fetch().await
             }
         }
     }
 
-    async fn inner_load(&mut self) -> color_eyre::Result<Option<Arc<V>>> {
+    /// Read from the cache to **load** the value. This rewrite the loaded value.
+    pub async fn load(&mut self) -> Result<Option<Arc<V>>, Error> {
         let id = self.get_verified_id().await?;
 
         let cached = self
@@ -84,8 +85,8 @@ where
 
         Ok(cached)
     }
-
-    async fn inner_fetch(&mut self) -> Result<Arc<V>, Error> {
+    /// Send a request to Musicbrainz to **fetch** the listen, and insert into self
+    pub async fn fetch(&mut self) -> Result<Arc<V>, Error> {
         let fetch_result = self.get_verified_id().await?.fetch_entity().await?;
         let converted_fetch = fetch_result.flattened_any();
 
@@ -115,14 +116,14 @@ where
 
         // TODO: Add try_join! for speedup.
         self.loaded = Some(value.clone());
-        self.alias_cache.set(&mbid_naive, &mbid).await?;
+        self.alias_cache.set(&mbid_naive, &mbid_naive).await?;
         self.disk_cache.set(&mbid, value.as_ref()).await?;
         Ok(())
     }
 
     // --- Update ---
 
-    pub async fn update(&mut self, value: Arc<V>) -> color_eyre::Result<()> {
+    pub async fn update(&mut self, value: Arc<V>) -> Result<(), Error> {
         let older_version = self.get_or_load().await?;
 
         let new_data = match older_version {
@@ -141,7 +142,7 @@ where
     pub async fn update_from_generic_entity(
         &mut self,
         value: &AnyMusicBrainzEntity,
-    ) -> color_eyre::Result<()> {
+    ) -> Result<(), Error> {
         let converted = V::try_from_any(value)?;
         self.update(converted).await
     }
