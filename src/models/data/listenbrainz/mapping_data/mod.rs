@@ -1,3 +1,4 @@
+pub mod converters;
 use derive_getters::Getters;
 use itertools::Itertools;
 use listenbrainz::raw::response::UserListensMBIDMapping;

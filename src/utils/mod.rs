@@ -1,3 +1,4 @@
+pub mod crates;
 pub mod cli;
 use std::fmt::Display;
 use std::sync::{Arc, Mutex};
@@ -105,6 +106,10 @@ pub fn println_cli<T: Display>(string: T) {
     let static_clone = STATIC_LOGGER.clone();
     let logger = static_clone.lock().unwrap();
     logger.println_cli(string);
+}
+
+pub fn println_cli_err<T: Display>(string: T) {
+    println_cli(format!("[Error] {string}").red());
 }
 
 pub fn println_cli_warn<T: Display>(string: T) {

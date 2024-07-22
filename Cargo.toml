@@ -14,8 +14,8 @@ rust-version = "1.75"
 # Main crate
 #listenbrainz = "0.7.0"
 # Self maintained upstream version
-listenbrainz = {version = "0.7.2", package = "listenbrainz_rs_nova"} # Fork with fixes
-#listenbrainz = { branch = "main", git = "https://github.com/InputUsername/listenbrainz-rs.git" }
+#listenbrainz = {version = "0.7.2", package = "listenbrainz_rs_nova"} # Fork with fixes
+listenbrainz = { branch = "main-nova", package = "listenbrainz_rs_nova", git = "https://github.com/RustyNova016/listenbrainz-rs.git" }
 
 # Upstream version of the musicbrainz crate. Use "listenbrainz-cli-tools_master" for main builds, "listenbrainz-cli-tools_dev" for dev builds
 # This fixes:

@@ -1,3 +1,4 @@
+pub mod converters;
 use std::collections::HashMap;
 
 use derive_getters::Getters;
@@ -13,9 +14,9 @@ pub struct MessyBrainzData {
     pub msid: String,
     pub track_name: String,
     pub artist_name: String,
-    release_name: Option<String>,
+    pub(super) release_name: Option<String>,
     pub origin_url: Option<String>,
-    additional_info: HashMap<String, serde_json::Value>,
+    pub(super) additional_info: HashMap<String, serde_json::Value>,
 }
 
 impl MessyBrainzData {
@@ -37,18 +38,3 @@ impl MessyBrainzData {
     }
 }
 
-impl From<UserListensListen> for MessyBrainzData {
-    fn from(value: UserListensListen) -> Self {
-        Self {
-            msid: value.recording_msid,
-            track_name: value.track_metadata.track_name.clone(),
-            artist_name: value.track_metadata.artist_name.clone(),
-            release_name: value.track_metadata.release_name.clone(),
-            origin_url: value
-                .track_metadata
-                .get_additional_string_metadata("origin_url")
-                .cloned(),
-            additional_info: value.track_metadata.additional_info,
-        }
-    }
-}

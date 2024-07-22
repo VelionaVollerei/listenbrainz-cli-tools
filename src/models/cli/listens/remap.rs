@@ -1,4 +1,5 @@
 use crate::core::entity_traits::mbid::is_cached_mbid::IsCachedMBID;
+use crate::core::json_querry::ReadAsJSON;
 use crate::models::data::listenbrainz::listen::Listen;
 use crate::models::data::listenbrainz::messybrainz::msid::MSID;
 use crate::models::data::listenbrainz::messybrainz::MessyBrainzData;
@@ -8,6 +9,8 @@ use crate::models::data::musicbrainz::mbid::MBID;
 use crate::models::data::musicbrainz::recording::mbid::RecordingMBID;
 use crate::models::error::Error;
 use crate::utils::println_cli;
+use crate::utils::println_cli_err;
+use crate::utils::println_cli_warn;
 use inquire::Select;
 use inquire::Text;
 use std::collections::HashMap;
@@ -16,7 +19,7 @@ use strum_macros::VariantArray;
 
 #[derive(Debug)]
 pub struct Remapper {
-    filter: HashMap<String, String>,
+    filter: HashMap<String, serde_json::Value>,
     state: State,
     username: String,
     token: String,
@@ -98,9 +101,12 @@ impl Remapper {
         let mut remapped_msids = Vec::new();
 
         for listen in listens.get_listens().clone().into_iter() {
+            // Already remapped? Skip
             if remapped_msids.contains(listen.get_messybrain_data().msid()) {
                 continue;
             }
+
+            // Does it fit the filter?
             if !self.listen_fit_filter(listen.as_ref()) {
                 continue;
             }
@@ -155,11 +161,16 @@ impl Remapper {
     }
 
     fn listen_fit_filter(&self, listen: &Listen) -> bool {
-        let messy = listen.get_messybrain_data();
+        let listen = listen.clone();
 
-        self.filter
-            .iter()
-            .all(|(name, value)| Self::filter_item_fit(messy, name, value))
+        for (field, value) in &self.filter {
+            let listen_value = listen.original_data().clone().get_field(field).expect("Couldn't convert the listen back to JSON.");
+            if &listen_value != value {
+                return false;
+            }
+        }
+
+        true
     }
 
     fn filter_item_fit(
@@ -191,10 +202,24 @@ fn ask_for_field_name() -> String {
         .unwrap()
 }
 
-fn ask_for_field_value() -> String {
-    Text::new("What value does this field have?")
-        .prompt()
-        .unwrap()
+fn ask_for_field_value() -> serde_json::Value {
+    loop {
+        let unchecked = Text::new("What value does this field have?")
+            .prompt()
+            .unwrap();
+
+        match serde_json::from_str(&unchecked) {
+            Ok(val) =>{
+                //println!("{val:#?}");
+                 return val},
+            Err(err) => {
+                println_cli_err("Couldn't convert the value to a json value. Check for typos? \n - Hint: Text values must be in quotes");
+
+                eprint!("{err}");
+                println!();
+            }
+        }
+    }
 }
 
 async fn ask_for_mbid() -> RecordingMBID {
